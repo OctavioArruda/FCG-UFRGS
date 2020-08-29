@@ -1,0 +1,94 @@
+Rendering: Algoritmos
+
+Algoritmo rasterização:
+
+for object in scene
+	for pixed covered by object
+		pixel_color = object color
+		
+Problema rasterização: sobreposição dos objetos
+Correção para o problema: Z-Buffer(buffer de profundidade)
+
+Algoritmo de ray casting(traçado de raios):
+
+for pixel in image plane
+	for object covering pixel
+		pixel_color = closest object color
+
+O raio é traçado para cada pixel e é feito um teste de intersecção com 
+os objetos da cena.
+
+Para os raios que possuem intersecção com mais de UM objeto ao mesmo tempo: O pixel normalmente é
+preenchido com a cor do objeto mais próximo da câmera.
+
+Tanto rasterização quanto raycasting geram a mesma imagem.
+
+Do ponto de vista computacional:
+- Ambos algoritmos precisam armazenar na memória a imagem sendo gerada
+- Rasterização: UM objeto por vez, Ray Casting: TODOS os objetos
+
+Overdraw = O mesmo pixel sendo reescrito varias vezes
+
+Rasterização                	  Ray Casting
+- Overdraw				  		- Sem overdraw
+- Iluminação e outros:    		- Fácil simulação de vários efeitos de iluminação
+dificuldade						- Obrigatório uso de estruturas de dados de aceleração para os testes de intersecção 
+- Rendering eficiente de cenas	  em cenas com muitos objetos (caso contrário, custo computacional gigantesco)
+com muitos objetos
+
+Rasterização possui uma implementação relativamente simples em hardware paralelo(mesma operação em inúmeros pixels)
+Muito utilizado em jogos, cads, aplicações de TEMPO REAL
+
+Ray Casting é muito utilizado quando se busca fotorealismo, como filmes e fotos
+Gpus atuais existem um suporte para ray casting
+
+Rendering por rasterização: Modelos normalmente representados por malhas de triângulos 
+Triângulos possuem várias vantagens, em particular, são polígonos convexos, de fácil rasterização.
+Isto é, fácil conversão para pixels
+
+Em ray casting malhas de triângulos também são utilizadas, mas outras representações matemáticas possuem vantagens
+
+Importante: Seção de algoritmo de rendering por rasterização
+
+- Pipeline Gráfico:
+
+1ª etapa: transformações geométricas
+2ª etapa: rasterização gerando os pixels finais, quais pixels devem ser preenchidos...
+
+Etapa de transformações geométricas:
+- Etapa de Model & View - Inicia com operações de modelagem e visualização
+	- Model coordinates, World coordinates e Camera(Eye) coordinates
+	- Matrizes de modelagem
+	- Model coord. -Matriz de modelagem--> World coord. -Matriz de visualização--> Eye coord.
+- Etapa de Vertex Shading - Envolve a definição de atributos numéricos para cada vértice de cada objeto
+	- cor (iluminação)
+	- vetores normais
+	- Interpolados pelo algoritmo de rasterização
+- Etapa de Project - Projeção dos vértices no plano de projeção
+	- Cada vértice de cada objeto é levado em direção ao centro de projeção da câmera definindo sua posição em cima
+	do plano de projeção
+	* NDC(Normalized device coordinates) -> Frustrum da câmera é deformado para que vire um quadrado
+	* Em NDC, os pontos que definem a posição da câmera estão nos pontos x = -1, y = -1; (-1, -1);
+- Etapa de Clipping 
+	- Objetos fora do volume de visualização são descartados
+- Etapa de Screen Mapping(Viewport)
+	- Mapeia todos objetos da NDC para coordenadas de tela(ou screen coord.)
+	
+Etapa de rasterização
+- Etapa de Fragment Generation
+	- Determinamos os pixels que deverão ser preenchidos para representar cada triângulo
+	- Nem todos fragmentos irão virar pixels na imagem final, alguns serão descartados!
+	- Atributos numéricos dos vértices são interpolados, gerando atributos para cada fragmento
+- Etapa de Fragment Shading
+	- Atributos interpolados são utilizados para definir a cor final de cada fragmento
+	- Normalmente envolve o uso de modelos de iluminação e mapeamento de texturas
+- Etapa de Visibility
+	- Resolve os problemas de visibilidade e oclusão
+	- Z-Buffer = região de memória onde será armazenado informação de profundidade de cada pixel 
+		- Posição em profundidade dos triângulos 
+			- Maior profundidade(maior coeficiente) => Mais longe da câmera
+		- Fragmento mais próximo da câmera se torna um pixel na imagem final
+
+Todos esses passos do Pipeline Gráfico são implementados em hardware.
+A parte de Model&View, Vertex Shading e Projection são programáveis
+Para Fragment Shading, é necessário usar um Fragment shader program, no caso de openGL, usa-se GLSL
