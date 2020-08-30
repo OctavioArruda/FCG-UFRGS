@@ -37,11 +37,13 @@
 // Headers locais, definidos na pasta "include/"
 #include "utils.h"
 
-#define TOTAL_VERTEX 32
+#define TOTAL_VERTICES_ONE 8
+#define TOTAL_VERTICES_ZERO 32
+#define CLOCK_POSITIONS 4
 
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
 // logo após a definição de main() neste arquivo.
-GLuint BuildTriangles(); // Constrói triângulos para renderização
+GLuint BuildTriangles(float horizontal_shift, float vertical_shift); // Constrói um triângulo para renderização
 GLuint LoadShader_Vertex(const char* filename);   // Carrega um vertex shader
 GLuint LoadShader_Fragment(const char* filename); // Carrega um fragment shader
 void LoadShader(const char* filename, GLuint shader_id); // Função utilizada pelas duas acima
@@ -143,8 +145,18 @@ int main()
     // Criamos um programa de GPU utilizando os shaders carregados acima
     GLuint program_id = CreateGpuProgram(vertex_shader_id, fragment_shader_id);
 
-    // Construímos a representação de um triângulo
-    GLuint vertex_array_object_id = BuildTriangles();
+    int count, stop, position;
+    int secs, secs_aux;
+    int secs_in_screen = 0;
+    int binary_time[] = {0, 0, 0, 0};
+
+    // VAO ids for each position in the clock
+    GLuint vertex_array_objects_ids[4] = {0, 0, 0, 0};
+
+    for (count = 0; count < CLOCK_POSITIONS; count++)
+    {
+        vertex_array_objects_ids[count] = BuildTriangles(count * .50 - 0.75, 0);
+    }
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -157,35 +169,72 @@ int main()
         // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
         //
         //           R     G     B     A
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.85f, 0.85f, 0.85f, 1.0f);
 
         // "Pintamos" todos os pixels do framebuffer com a cor definida acima
         glClear(GL_COLOR_BUFFER_BIT);
+
+        secs = (int)glfwGetTime() % 16;
+
+        if (secs_in_screen != secs)
+        {
+            secs_in_screen = secs;
+            secs_aux = secs;
+            position = 3;
+
+            for (count = 0; count < CLOCK_POSITIONS; count++)
+            {
+                binary_time[count] = 0;
+            }
+
+            stop = 0;
+
+            do
+            {
+                if (secs_aux < 2)
+                {
+                    binary_time[position] = secs_aux;
+                    stop = 1;
+                }
+                else
+                {
+                    binary_time[position] = secs_aux % 2; // lsb = less significative bit
+                    secs_aux != 2;
+                    position--;
+                }
+            } while(!stop);
+
+            printf("%d\n", secs);
+
+            for (count = 0; count < CLOCK_POSITIONS; count++)
+            {
+                printf("%d", binary_time[count]);
+                printf("\n");
+            }
+        }
 
         // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
         // os shaders de vértice e fragmentos).
         glUseProgram(program_id);
 
-        // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
-        // vértices apontados pelo VAO criado pela função BuildTriangles(). Veja
-        // comentários detalhados dentro da definição de BuildTriangles().
-        glBindVertexArray(vertex_array_object_id);
+        for (count = 0; count < CLOCK_POSITIONS; count++)
+        {
+            glBindVertexArray(vertex_array_objects_ids[count]);
 
-        // Pedimos para a GPU rasterizar os vértices apontados pelo VAO como
-        // triângulos.
-        //
-        //                +--- Veja slide 150 do documento "Aula_04_Modelagem_Geometrica_3D.pdf".
-        //                |          +--- O array "indices[]" contém 6 índices (veja função BuildTriangles()).
-        //                |          |  +--- Os índices são do tipo "GLubyte" (8 bits sem sinal)
-        //                |          |  |                 +--- Vértices começam em indices[0] (veja função BuildTriangles()).
-        //                |          |  |                 |
-        //                V          V  V                 V
-        glDrawElements(GL_TRIANGLE_STRIP, TOTAL_VERTEX + 2, GL_UNSIGNED_BYTE, 0);
+            if (binary_time[count] == 0)
+            {
+                glDrawElements(GL_TRIANGLE_STRIP, TOTAL_VERTICES_ZERO + 2, GL_UNSIGNED_BYTE, 0);
+            }
+            else
+            {
+                glDrawElements(GL_TRIANGLE_STRIP, TOTAL_VERTICES_ONE - 1, GL_UNSIGNED_BYTE, (void*)(TOTAL_VERTICES_ZERO + 2 + 1));
+            }
 
-
-        // "Desligamos" o VAO, evitando assim que operações posteriores venham a
-        // alterar o mesmo. Isso evita bugs.
-        glBindVertexArray(0);
+            // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
+            // vértices apontados pelo VAO criado pela função BuildTriangles(). Veja
+            // comentários detalhados dentro da definição de BuildTriangles().
+            glBindVertexArray(0);
+        }
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -208,34 +257,72 @@ int main()
     return 0;
 }
 
-GLuint BuildTriangles()
+GLuint BuildTriangles(float horizontal_shift, float vertical_shift)
 {
-    GLfloat NDC_coefficients[TOTAL_VERTEX * 4];
-
-    float sine, cosine, angle;
+    int offset = TOTAL_VERTICES_ONE;
 
     float theta = 2 * M_PI / 16;
-    float external_radius = .7;
-    float internal_radius = .5;
+    float angle;
+
+    float external_x = .2;
+    float internal_x = .1;
+
+    float external_y = .4;
+    float internal_y = .3;
+
+    float digit_one_half_width = 0.05;
+
+    GLfloat NDC_coefficients[TOTAL_VERTICES_ZERO * 4 + TOTAL_VERTICES_ONE * 4];
 
     int idx;
 
-    for (idx = 0; idx < TOTAL_VERTEX; idx++)
+    for (idx = 0; idx < (TOTAL_VERTICES_ZERO + TOTAL_VERTICES_ONE); idx++)
     {
         NDC_coefficients[idx * 4 + 2] = 0.0f;
         NDC_coefficients[idx * 4 + 3] = 1.0f;
     }
 
-    for (idx = 0; idx < TOTAL_VERTEX / 2; idx++)
+    // X, Y coords. for every vertice of digit zero
+    for (idx = 0; idx < 16; idx++)
     {
         angle = idx * theta;
-        cosine = cos(angle);
-        sine = sin(angle);
-        NDC_coefficients[idx * 8 + 0] = external_radius * cosine;
-        NDC_coefficients[idx * 8 + 1] = external_radius * sine;
-        NDC_coefficients[idx * 8 + 4] = internal_radius * cosine;
-        NDC_coefficients[idx * 8 + 5] = internal_radius * sine;
+
+        // External vertices for digit zero
+        NDC_coefficients[idx * 8 + 0] = horizontal_shift * external_x * cos(angle);
+        NDC_coefficients[idx * 8 + 1] = vertical_shift * external_y * sin(angle);
+
+        // Internal vertices for digit zero
+        NDC_coefficients[idx * 8 + 4] = horizontal_shift * internal_x * cos(angle);
+        NDC_coefficients[idx * 8 + 5] = vertical_shift * internal_y * sin(angle);
     }
+
+    // X, Y coords. for every vertice of digit one
+
+    // Upper
+    NDC_coefficients[(offset + 0) * 4] = -3*  digit_one_half_width / 2 + horizontal_shift;
+    NDC_coefficients[(offset + 0) * 4 + 1] = external_y + vertical_shift;
+
+    NDC_coefficients[(offset + 1) * 4] = -3 * digit_one_half_width / 2 + horizontal_shift;
+    NDC_coefficients[(offset + 1) * 4 + 1] = external_y - .2 + vertical_shift;
+
+    NDC_coefficients[(offset + 2) * 4] = digit_one_half_width + horizontal_shift;
+    NDC_coefficients[(offset + 2) * 4 + 1] = external_y + vertical_shift;
+
+    NDC_coefficients[(offset + 3) * 4] = digit_one_half_width + horizontal_shift;
+    NDC_coefficients[(offset + 3) * 4 + 1] = external_y - .2 + vertical_shift;
+
+    // Lower
+    NDC_coefficients[(offset + 4) * 4] = -digit_one_half_width + horizontal_shift;
+    NDC_coefficients[(offset + 4) * 4 + 1] = external_y - .2 + vertical_shift;
+
+    NDC_coefficients[(offset + 5) * 4] = digit_one_half_width + horizontal_shift;
+    NDC_coefficients[(offset + 5) * 4 + 1] = external_y - .2 + vertical_shift;
+
+    NDC_coefficients[(offset + 6) * 4] = -digit_one_half_width + horizontal_shift;
+    NDC_coefficients[(offset + 6) * 4 + 1] = -external_y + vertical_shift;
+
+    NDC_coefficients[(offset + 7) * 4] = digit_one_half_width + horizontal_shift;
+    NDC_coefficients[(offset + 7) * 4 + 1] = -external_y + vertical_shift;
 
     GLuint VBO_NDC_coefficients_id;
     glGenBuffers(1, &VBO_NDC_coefficients_id);
@@ -259,21 +346,28 @@ GLuint BuildTriangles()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    GLfloat color_coefficients[TOTAL_VERTEX * 4];
+    GLfloat color_coefficients[TOTAL_VERTICES_ZERO * 4 + TOTAL_VERTICES_ONE * 4];
 
-    for (idx = 0; idx < TOTAL_VERTEX; idx += 2)
+    // Colors for zero
+    for (idx = TOTAL_VERTICES_ZERO; idx < TOTAL_VERTICES_ZERO + 6; idx++)
     {
-        color_coefficients[idx * 4 + 0] = 0.0f;
-        color_coefficients[idx * 4 + 1] = 0.0f;
-        color_coefficients[idx * 4 + 2] = 1.0f;
-        color_coefficients[idx * 4 + 3] = 1.0f;
+        color_coefficients[idx * 8 + 0] = 0.0f;
+        color_coefficients[idx * 8 + 1] = 0.0f;
+        color_coefficients[idx * 8 + 2] = 1.0f;
+        color_coefficients[idx * 8 + 3] = 0.0f;
+
+        color_coefficients[idx * 8 + 4] = 0.0f;
+        color_coefficients[idx * 8 + 5] = 0.75f;
+        color_coefficients[idx * 8 + 6] = 1.0f;
+        color_coefficients[idx * 8 + 7] = 0.0f;
     }
 
-    for (idx = 1; idx < TOTAL_VERTEX; idx += 2)
+    // Colors for one
+    for (idx = TOTAL_VERTICES_ZERO + 6; idx < TOTAL_VERTICES_ZERO; idx++)
     {
-        color_coefficients[idx * 4 + 0] = 1.0f;
+        color_coefficients[idx * 4 + 0] = 0.3f;
         color_coefficients[idx * 4 + 1] = 0.0f;
-        color_coefficients[idx * 4 + 2] = 0.0f;
+        color_coefficients[idx * 4 + 2] = 0.8f;
         color_coefficients[idx * 4 + 3] = 1.0f;
     }
 
@@ -288,12 +382,16 @@ GLuint BuildTriangles()
     glEnableVertexAttribArray(location);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // Extra positions to close inner and outer walls
-    GLubyte indices[TOTAL_VERTEX + 2];
+    GLubyte indices[TOTAL_VERTICES_ZERO + 2 + TOTAL_VERTICES_ONE];
 
-    for (idx = 0; idx < TOTAL_VERTEX + 2; idx++)
+    for (idx = 0; idx <= 33; idx++)
     {
-        indices[idx] = idx % TOTAL_VERTEX;
+        indices[idx] = idx % 32;
+    }
+
+    for (idx = TOTAL_VERTICES_ZERO + 2; idx < TOTAL_VERTICES_ZERO + TOTAL_VERTICES_ONE + 2; idx++)
+    {
+        indices[idx] = idx - 2;
     }
 
     GLuint indices_id;
