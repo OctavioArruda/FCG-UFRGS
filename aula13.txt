@@ -1,0 +1,99 @@
+FCG - Clipping and culling
+
+Culling => Descarte => visa evitar processamento desnecessário
+-> Decartamos o que não será visto
+
+Frustrum culling = fora do frustum 
+
+Backface culling = "lado de trás" do objeto
+
+Occlusion culling = objeto escondido por outro
+
+Clipping => processo de "recortar" um objeto, presenvando somente
+as partes de interesse -> Visa evitar erros de rendering
+Por exemplo: tentar desenhar um pixel fora da tela irá gerar um erro de 
+acesso à memória do framebuffer, ou pode acabar sobreescrevendo um pixel errado; Portanto, "recortamos" regiões problemáticas; Feito automaticamente pela GPU
+
+Backface culling => processo mais simples para descarte de triângulo
+
+* Como detectar triângulos que estão "de costas" para a câmera(e que portanto podem ser descartados)? Descartar (cull) triângulos quando vetor c dot product com vetor n for menor que 0
+
+Como computar o vetor n? São os vetores normais de cada triângulo que compõe o objeto!
+c é um vetor que aponta para a câmera!
+
+É necessário habilitar Backface Culling em OpenGL. É feito da seguinte forma:
+
+glEnable(GL_CULL_FACE);
+
+// backface culling
+glCullFace(GL_BACK);
+
+// counter clock-wise direction
+glFrontFace(GL_CCW); 
+
+Como gerar corretamente a imagem da cena quando existem objetos escondidos por outros?
+
+Algoritmo do Pintor:
+
+-> Desenhar primeiro objetos mais distantes da câmera
+	- Necessário ORDENAÇÃO dos polígonos
+	- Necessário REORDENAR os objetos ao movimentar a câmera
+	- Ordenação NEM SEMPRE É POSSÍVEL -> Solução: Z-Buffer(depth buffer)
+	- Z-Buffer: armazenamento dos valores de profundidade dos objetos
+		- Vantagens: fácil implementação, funciona para qualquer tipo de objeto
+		- Desvantagens: utiliza muita memória (#pixels * bitsperpixel)[depende da precisão desejada para z], na rasteriazação precisa interpolar z de cada vértice para cada pixel, não funciona diretamente para renderizar objetos transparentes
+		Problema: Z-fighting -> Dois objetos se sobrepondo -> exemplo: dois planos
+		
+	Habilitando Z-buffer em openGL:
+	glEnable(DL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	
+Frustrum Culling:
+
+-> Precisamos descartar objetos fora do frustrum da câmera, caso contrário estes objetos poderão ser projetados no plano de imagem pelas matrizes de projeção.
+		
+-> Como testar se um ponto p está dentro do frustrum? Mais fácil testar após a transformação para NDC. Ou seja, após aplicar a matriz M*P + a divisão por w, estaremos em NDC(que será um cubo de (-1, -1, -1) até (1, 1, 1,)). Ou seja, p estará dentro do frustrum se -1 <= px <= 1; -1 <= py <= 1; -1 <= pz <= 1; em NDC
+
+	Note que o ponto só estará em NDC após a multiplicação MP e após a divisão por w.
+-> Linhas precisam de recorte. Também é feito mais facilmente em NDC. Normalmente feito após a multiplicação pela matriz de projeção perspectiva e antes da divisão por w. Espaço chamado de "clip space". Por quê? Divisão por w gera uma singularidade para primitivas que cruzam o plano z = 0; O recorte (clipping) da linha deve ser feito antes da divisão por w, para evitar a singularidade do plano z = 0;
+
+Renderizando linhas:
+1) Aplicar matriz de projeção nos pontos extremos a e b;
+2) Recortar (se necessário) <- Como fazer o recorte?
+3) Fazer a divisão por w
+4) Rasterizar (e.g. Bresenham)
+
+Algoritmo de Cohen e Sutherland
+-> Para cada região, adiciona-se um código com 4 dígitos binários.
+O 1º dígito está associado ao plano a esquerda 
+O 2º digito está associado ao plano a direita
+O 3º digito está associado ao plano inferior
+O 4º digito está associado ao plano superior
+
+Para cada linha que vamos testar, vamos associar aos seus pontos extremos os códigos de quatro dígitos da região
+
+Códigos = outcodes
+Bitwise And of outcodes != 0000 => Linha está fora (descarta)
+Bitwise Or of outcodes == 0000 => Linha está 100% dentro da região de desenho -> Pode ser desenhada sem recorte
+Caso contrário, linha tem chance de necessitar recorte
+
+Recorte de triângulos -> Algoritmo de Cohen-Sutherland, também.
+- Operação complexa, pois o recorte pode gerar um novo polígono, o qual deve ser composto por triângulos, novamente
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
