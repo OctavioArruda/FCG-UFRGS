@@ -1,0 +1,1 @@
+Apenas instruções para utilização de OPENGL e utilização do CodeBlocks
