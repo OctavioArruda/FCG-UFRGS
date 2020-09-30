@@ -1,0 +1,98 @@
+Aula 06: Transformações geométricas 2D
+
+Transformações geométricas:
+-> transformam pontos em novos pontos
+-> transformam vetores em novos vetores
+-> NUNCA irá transformar um PONTO em um VETOR
+
+Usos: posicionar e mudar a forma de objetos, criar cópias, realizar animações
+
+Identidade T(p) = p, T(vetoru) = vetoru // Transformação geométrica mais básica 
+
+Translação:
+-> Definida SOMENTE em pontos
+-> Realiza um deslocamento de um ponto p através de um vetor de translação ou deslocamento d
+-> VETORES NÃO SOFREM TRANSLAÇÃO pois não possuem localização espacial
+
+Rotação:
+-> Definida SOMENTE em vetores
+
+Escalamento:
+-> Definida SOMENTE em vetores
+-> Pode ser representada por uma multiplicação por escalar (quando uniforme)
+-> Quando não uniforme, representado por uma matriz
+
+Reflexão: É UM TIPO DE ESCALAMENTO
+-> Uniforme => Escalar negativo
+-> Não uniforme => Matriz
+
+Cisalhamento (shearing): 
+-> Representado por uma matriz
+
+** Transformações geométricas não alteram TOPOLOGIA do objeto
+
+Uma câmera virtual pode ser movimentada através de duas transformações
+-> Translação da posição da câmera dada pelo ponto c 
+-> Rotação do vetor de orientação da câmera d
+
+Classes de transformações geométricas
+
+Transformações rígidas:
+-> Preservam distâncias e ângulos 
+-> Translação, rotação, identidade
+
+Transformações similares:
+-> Preservam SOMENTE ângulos
+-> Englobam as transformaçoes rígidas e escalamento uniforme e reflexão
+
+Transformações lineares:
+-> Preservam adição e multiplicação por escalar e portanto, preservam combinações lineares
+-> Englobam transformações rígidas(sem translação), similares e escala não-uniforme e cisalhamento
+
+Transformações afins:
+-> Englobam as transformações lineares e a translação
+-> Preservam linhas paralelas
+
+Transformações projetivas:
+-> Preservam pontos colinares(linhas)
+
+Translação não é linear -> Pode ser representada por uma matriz NxN, em N dimensões
+
+
+Transformações Lineares:
+-> Matrizes que transformam vetores
+-> Escalamento relativo à origem(vetores que definem os pontos em relação a origem)
+
+* Inversa do scale não uniforme: 1/sx e 1/sy se sx e sy != 0 na matriz de scale original
+* Por definição, nossas matrizes de rotação irão operar no sentido anti-horário
+
+Propriedades da matriz de rotação 2D:
+Determinante = 1
+Inversa = Rotação pelo mesmo ângulo mas no sentido contrário(horário). Inverter sinal do ângulo alfa. Pode ser alcançada através da transposta
+
+Translação 2D:
+Não é linear, logo não pode ser representada por uma matriz 2x2
+Translação transforma pontos 
+
+
+*** COORDENADAS HOMOGÊNEAS ***
+-> Para trabalhar somente com matrizes
+-> Notação uniforme para transformação
+-> Álgebra uniforme para composição de transformações
+-> Possível obter essa unificação adicionando uma dimensão extra (w)
+* Vetores possuem a dimensão w como 0, pontos possuem a dimensão w como 1
+* Soma de dois pontos é uma operação que não existe
+* Vetores NÃO sofrem translação(pois não possuem localização espacial)
+* Se aplicarmos, coordenadas homogeneas, escalamento 2d em um ponto, o ponto basicamente sofre um deslocamento em sx e sy
+* ESCALAMENTO ACONTECE EM RELAÇÃO A ORIGEM, NÃO AO CENTRO DO OBJETO!!!!!!!
+* Para fazer um scale ou rotação relativo ao centro do objeto, é necessário fazer a translação para origem, a rotação, e depois a translação inversa para mover o objeto para sua posição original
+
+
+
+
+
+
+
+
+
+
