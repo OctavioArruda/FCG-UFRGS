@@ -1,0 +1,29 @@
+Transformações geométricas 3D:
+
+Transformações geométricas transformam pontos em novos pontos e vetores em novos vetores
+
+Coordenação homogêneas é utilizada para unifcar transformações lineares com translação
+
+**Viewport Mapping
+
+Transforma de NDC para Pixel coordinates
+
+***Generalized Viewport Mapping
+
+Retangulo(a,b) para o Retangulo(p, q)
+
+Translação(a -> o)
+Escala(b-a -> q-p)
+Translação(o -> p)
+
+Rotações extrinsicas(EXtrinsic Rotations): rotações ocorrem em torno dos eixos globais e não locais. Muliplicações ocorrendo à esquerda
+
+Rotações intrinsicas(INtrinsic Rotations): Multiplicações ocorrem à direita, objeto rotaciona em relação aos eixos locais
+
+Gimbal Lock -> Euler Angles -> Dependendo do valor do angulo Beta, rotacionar duas dimensões pode resultar numa rotação igual, para dois eixos diferentes sendo movimentados
+
+
+** Fórmula de Rodrigues:
+
+Descreve o formato de uma matriz de rotação que realiza uma rotação de ângulo alfa em torno de um eixo v qualquer
+
