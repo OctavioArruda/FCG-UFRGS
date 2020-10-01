@@ -1,0 +1,11 @@
+Aula 08: Sistema de coordenadas 
+
+Model coordinates -> através de matrizes de modelagem => World coordinates
+World coordinates -> através de matriz de visualização => Camera (eye) coordinates
+
+Uma mudança de sistema de coordenadas nada mais é que uma transformação geométrica
+
+
+Model (Object) Coordinates
+
+
