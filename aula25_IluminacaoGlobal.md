@@ -18,5 +18,5 @@ Ray Casting:
 
 Recursive Ray Tracing:
 - Quando um raio atingir uma superfície, geramos outro(s) raio(s) recursivamente
-	- Sombras, reflexão e transmissão especular *ideal*
+- Sombras, reflexão e transmissão especular *ideal*
 	
