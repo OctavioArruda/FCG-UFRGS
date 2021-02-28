@@ -3,6 +3,11 @@
 Para compilar e executar este projeto no Windows, baixe a IDE Code::Blocks em
 http://codeblocks.org/ e abra o arquivo "Laboratorio_X.cbp".
 
+**ATENÇÃO**: os "Build targets" padrões (Debug e Release) estão configurados
+para Code::Blocks versão 20.03 ou superior, que utiliza MinGW 64-bits. Se você
+estiver utilizando versões mais antigas do Code::Blocks (17.12 ou anteriores)
+você precisa alterar o "Build target" para "Debug (CBlocks 17.12 32-bit)" ou
+"Release (CBlocks 17.12 32-bit)" antes de compilar o projeto.
 
 === Linux
 ===================================
@@ -10,11 +15,13 @@ Para compilar e executar este projeto no Linux, primeiro você precisa instalar
 as bibliotecas necessárias. Para tanto, execute o comando abaixo em um terminal.
 Esse é normalmente suficiente em uma instalação de Linux Ubuntu:
 
-    sudo apt-get install build-essential make libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxcb1-dev libxext-dev libxrender-dev libxfixes-dev libxau-dev libxdmcp-dev
+    sudo apt-get install build-essential make libx11-dev libxrandr-dev \
+                         libxinerama-dev libxcursor-dev libxcb1-dev libxext-dev \
+                         libxrender-dev libxfixes-dev libxau-dev libxdmcp-dev
 
 Se você usa Linux Mint, talvez seja necessário instalar mais algumas bibliotecas:
 
-   sudo apt-get install libmesa-dev libxxf86vm-dev
+    sudo apt-get install libmesa-dev libxxf86vm-dev
 
 Após a instalação das bibliotecas acima, você possui duas opções para compilação:
 utilizar Code::Blocks ou Makefile.

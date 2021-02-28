@@ -23,14 +23,14 @@ void main()
 {
     // A variável gl_Position define a posição final de cada vértice
     // OBRIGATORIAMENTE em "normalized device coordinates" (NDC), onde cada
-    // coeficiente está entre -1 e 1.  (Veja slides 144 e 150 do documento "Aula_09_Projecoes.pdf").
+    // coeficiente está entre -1 e 1.  (Veja {+NDC2+}).
     //
     // O código em "main.cpp" define os vértices dos modelos em coordenadas
     // locais de cada modelo (array model_coefficients). Abaixo, utilizamos
     // operações de modelagem, definição da câmera, e projeção, para computar
     // as coordenadas finais em NDC (variável gl_Position). Após a execução
     // deste Vertex Shader, a placa de vídeo (GPU) fará a divisão por W. Veja
-    // slide 189 do documento "Aula_09_Projecoes.pdf".
+    // slides 41-67 e 69-86 do documento Aula_09_Projecoes.pdf.
 
     gl_Position = projection * view * model * model_coefficients;
 

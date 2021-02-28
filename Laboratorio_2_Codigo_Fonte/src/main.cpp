@@ -188,7 +188,7 @@ int main()
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados
-    // para renderização. Veja slides 217-219 do documento "Aula_03_Rendering_Pipeline_Grafico.pdf".
+    // para renderização. Veja slides 176-196 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
     //
     // Note que o caminho para os arquivos "shader_vertex.glsl" e
     // "shader_fragment.glsl" estão fixados, sendo que assumimos a existência
@@ -230,7 +230,7 @@ int main()
     GLint projection_uniform      = glGetUniformLocation(program_id, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
     GLint render_as_black_uniform = glGetUniformLocation(program_id, "render_as_black"); // Variável booleana em shader_vertex.glsl
 
-    // Habilitamos o Z-buffer. Veja slide 108 do documento "Aula_09_Projecoes.pdf".
+    // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
 
     // Variáveis auxiliares utilizadas para chamada à função
@@ -275,28 +275,28 @@ int main()
         float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-        // Veja slides 172-182 do documento "Aula_08_Sistemas_de_Coordenadas.pdf".
+        // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
         glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f); // Ponto "c", centro da câmera
         glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
         glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
         glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
-        // definir o sistema de coordenadas da câmera.  Veja slide 186 do documento "Aula_08_Sistemas_de_Coordenadas.pdf".
+        // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
         glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
 
         // Agora computamos a matriz de Projeção.
         glm::mat4 projection;
 
         // Note que, no sistema de coordenadas da câmera, os planos near e far
-        // estão no sentido negativo! Veja slides 190-193 do documento "Aula_09_Projecoes.pdf".
+        // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
         float farplane  = -10.0f; // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
             // Projeção Perspectiva.
-            // Para definição do field of view (FOV), veja slide 227 do documento "Aula_09_Projecoes.pdf".
+            // Para definição do field of view (FOV), veja slides 205-215 do documento Aula_09_Projecoes.pdf.
             float field_of_view = 3.141592 / 3.0f;
             projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         }
@@ -304,7 +304,7 @@ int main()
         {
             // Projeção Ortográfica.
             // Para definição dos valores l, r, b, t ("left", "right", "bottom", "top"),
-            // PARA PROJEÇÃO ORTOGRÁFICA veja slide 236 do documento "Aula_09_Projecoes.pdf".
+            // PARA PROJEÇÃO ORTOGRÁFICA veja slides 219-224 do documento Aula_09_Projecoes.pdf.
             // Para simular um "zoom" ortográfico, computamos o valor de "t"
             // utilizando a variável g_CameraDistance.
             float t = 1.5f*g_CameraDistance/2.5f;
@@ -326,7 +326,7 @@ int main()
             // Cada cópia do cubo possui uma matriz de modelagem independente,
             // já que cada cópia estará em uma posição (rotação, escala, ...)
             // diferente em relação ao espaço global (World Coordinates). Veja
-            // slide 155 do documento "Aula_08_Sistemas_de_Coordenadas.pdf".
+            // slides 2-14 e 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
             glm::mat4 model;
 
             if (i == 1)
@@ -350,7 +350,7 @@ int main()
             {
                 // A terceira cópia do cubo sofrerá rotações em X,Y e Z (nessa
                 // ordem) seguindo o sistema de ângulos de Euler, e após uma
-                // translação em X. Veja slide 72 do documento "Aula_07_Transformacoes_Geometricas_3D.pdf".
+                // translação em X. Veja slides 106-107 do documento Aula_07_Transformacoes_Geometricas_3D.pdf.
                 model = Matrix_Translate(-2.0f, 0.0f, 0.0f) // QUARTO translação
                       * Matrix_Rotate_Z(g_AngleZ)  // TERCEIRO rotação Z de Euler
                       * Matrix_Rotate_Y(g_AngleY)  // SEGUNDO rotação Y de Euler
@@ -384,7 +384,7 @@ int main()
             // função BuildTriangles(), e veja a documentação da função
             // glDrawElements() em http://docs.gl/gl3/glDrawElements.
             glDrawElements(
-                g_VirtualScene["cube_faces"].rendering_mode, // Veja slide 150 do documento "Aula_04_Modelagem_Geometrica_3D.pdf"
+                g_VirtualScene["cube_faces"].rendering_mode, // Veja slides 124-130 do documento Aula_04_Modelagem_Geometrica_3D.pdf
                 g_VirtualScene["cube_faces"].num_indices,
                 GL_UNSIGNED_INT,
                 (void*)g_VirtualScene["cube_faces"].first_index
@@ -439,7 +439,7 @@ int main()
 
         // Agora queremos desenhar os eixos XYZ de coordenadas GLOBAIS.
         // Para tanto, colocamos a matriz de modelagem igual à identidade.
-        // Veja slide 155 do documento "Aula_08_Sistemas_de_Coordenadas.pdf".
+        // Veja slides 2-14 e 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
         glm::mat4 model = Matrix_Identity();
 
         // Enviamos a nova matriz "model" para a placa de vídeo (GPU). Veja o
@@ -519,11 +519,10 @@ GLuint BuildTriangles()
     // coordenadas local de cada modelo geométrico. Note o uso de coordenadas
     // homogêneas.  Veja as seguintes referências:
     //
-    //  - slide 31 do documento "Aula_08_Sistemas_de_Coordenadas.pdf";
-    //  - slide 150 do documento "Aula_08_Sistemas_de_Coordenadas.pdf";
-    //  - slides 144 e 150 do documento "Aula_09_Projecoes.pdf".
+    //  - slides 35-48 do documento Aula_08_Sistemas_de_Coordenadas.pdf;
+    //  - slides 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf;
     //
-    // Este vetor "model_coefficients" define a GEOMETRIA (veja slide 114 do documento "Aula_04_Modelagem_Geometrica_3D.pdf").
+    // Este vetor "model_coefficients" define a GEOMETRIA (veja slides 64-71 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
     //
     GLfloat model_coefficients[] = {
     // Vértices de um cubo
@@ -619,7 +618,7 @@ GLuint BuildTriangles()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Agora repetimos todos os passos acima para atribuir um novo atributo a
-    // cada vértice: uma cor (veja slide 115 do documento "Aula_04_Modelagem_Geometrica_3D.pdf").
+    // cada vértice: uma cor (veja slides 107-110 do documento Aula_03_Rendering_Pipeline_Grafico.pdf e slide 72 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
     // Tal cor é definida como coeficientes RGBA: Red, Green, Blue, Alpha;
     // isto é: Vermelho, Verde, Azul, Alpha (valor de transparência).
     // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
@@ -658,9 +657,9 @@ GLuint BuildTriangles()
     // Vamos então definir polígonos utilizando os vértices do array
     // model_coefficients.
     //
-    // Para referência sobre os modos de renderização, veja slide 150 do documento "Aula_04_Modelagem_Geometrica_3D.pdf".
+    // Para referência sobre os modos de renderização, veja slides 124-130 do documento Aula_04_Modelagem_Geometrica_3D.pdf.
     //
-    // Este vetor "indices" define a TOPOLOGIA (veja slide 114 do documento "Aula_04_Modelagem_Geometrica_3D.pdf").
+    // Este vetor "indices" define a TOPOLOGIA (veja slides 64-71 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
     //
     GLuint indices[] = {
     // Definimos os índices dos vértices que definem as FACES de um cubo
@@ -912,13 +911,13 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
     // Indicamos que queremos renderizar em toda região do framebuffer. A
     // função "glViewport" define o mapeamento das "normalized device
     // coordinates" (NDC) para "pixel coordinates".  Essa é a operação de
-    // "Screen Mapping" ou "Viewport Mapping" vista em aula (slides 33-44 do documento "Aula_07_Transformacoes_Geometricas_3D.pdf").
+    // "Screen Mapping" ou "Viewport Mapping" vista em aula ({+ViewportMapping2+}).
     glViewport(0, 0, width, height);
 
     // Atualizamos também a razão que define a proporção da janela (largura /
     // altura), a qual será utilizada na definição das matrizes de projeção,
     // tal que não ocorra distorções durante o processo de "Screen Mapping"
-    // acima, quando NDC é mapeado para coordenadas de pixels. Veja slide 227 do documento "Aula_09_Projecoes.pdf".
+    // acima, quando NDC é mapeado para coordenadas de pixels. Veja slides 205-215 do documento Aula_09_Projecoes.pdf.
     //
     // O cast para float é necessário pois números inteiros são arredondados ao
     // serem divididos!
